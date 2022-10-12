@@ -5,6 +5,7 @@ const nodeResolve = require('rollup-plugin-node-resolve');
 const commonjs = require('rollup-plugin-commonjs');
 const json = require('rollup-plugin-json');
 const license = require('rollup-plugin-license');
+const addDefaultExportStatement = require('./rollup-plugin-export-default');
 
 async function main() {
   await Promise.all([
@@ -13,7 +14,7 @@ async function main() {
     // bundleDependency('browserify-fs'),
     // bundleDependency('crypto-browserify'),
   ])
-  
+
   // quick and dirty find-replace
   // const cryptoPolyfillLoc = path.join(__dirname, '../polyfills/crypto-browserify.js');
   // let cryptoPolyfill = fs.readFileSync(cryptoPolyfillLoc, 'utf8');
@@ -31,6 +32,7 @@ async function bundleDependency(depName) {
         browser: true,
         preferBuiltins: true
       }),
+      addDefaultExportStatement(),
       license({
         thirdParty: {
           output: path.join(__dirname, '..', 'polyfills', `LICENSE-${depName}.txt`),

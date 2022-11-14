@@ -25,6 +25,7 @@ declare const _default: {
     "buffer-es6.js": string;
     "console.js": string;
     "constants.js": string;
+    "crypto-browserify.js": string;
     "domain.js": string;
     "empty.js": string;
     "events.js": string;

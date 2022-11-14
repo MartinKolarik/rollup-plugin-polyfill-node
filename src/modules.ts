@@ -40,11 +40,11 @@ export function getModules() {
   libs.set('fs', EMPTY_PATH);
   libs.set('crypto', EMPTY_PATH);
   // libs.set('fs', POLYFILLS['browserify-fs.js']);
-  // libs.set('crypto', POLYFILLS['crypto-browserify.js']);
+  libs.set('crypto', POLYFILLS['crypto-browserify.js']);
 
   // TODO: No good polyfill exists yet
   libs.set('http2', EMPTY_PATH);
-  
+
   // not shimmed
   libs.set('dns', EMPTY_PATH);
   libs.set('dgram', EMPTY_PATH);

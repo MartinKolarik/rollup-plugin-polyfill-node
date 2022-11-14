@@ -12,7 +12,7 @@ async function main() {
     bundleDependency('process-es6'),
     bundleDependency('buffer-es6'),
     // bundleDependency('browserify-fs'),
-    // bundleDependency('crypto-browserify'),
+    bundleDependency('crypto-browserify'),
   ])
 
   // quick and dirty find-replace

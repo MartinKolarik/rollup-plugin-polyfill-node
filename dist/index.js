@@ -38,12 +38,12 @@ function index (opts = {}) {
                 importee = importee.slice(1).replace(/\?commonjs-\w+$/, '');
             }
             if (importee === DIRNAME_PATH) {
-                const id = getRandomId();
+                const id = getRandomId('d');
                 dirs.set(id, dirname("/" + relative(basedir, importer)));
                 return { id, moduleSideEffects: false };
             }
             if (importee === FILENAME_PATH) {
-                const id = getRandomId();
+                const id = getRandomId('f');
                 dirs.set(id, dirname("/" + relative(basedir, importer)));
                 return { id, moduleSideEffects: false };
             }
@@ -77,8 +77,8 @@ function index (opts = {}) {
         },
     };
 }
-function getRandomId() {
-    return crypto.randomBytes(15).toString("hex");
+function getRandomId(prefix) {
+    return `\0node-polyfills:${prefix}:${crypto.randomBytes(15).toString("hex")}`;
 }
 const DIRNAME_PATH = "\0node-polyfills:dirname";
 const FILENAME_PATH = "\0node-polyfills:filename";

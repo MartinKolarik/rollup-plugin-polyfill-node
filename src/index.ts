@@ -43,12 +43,12 @@ export default function (opts: NodePolyfillsOptions = {}): Plugin {
         importee = importee.slice(1).replace(/\?commonjs-\w+$/, '');
       }
       if (importee === DIRNAME_PATH) {
-        const id = getRandomId();
+        const id = getRandomId('d');
         dirs.set(id, dirname("/" + relative(basedir, importer!)));
         return { id, moduleSideEffects: false };
       }
       if (importee === FILENAME_PATH) {
-        const id = getRandomId();
+        const id = getRandomId('f');
         dirs.set(id, dirname("/" + relative(basedir, importer!)));
         return { id, moduleSideEffects: false };
       }
@@ -73,7 +73,7 @@ export default function (opts: NodePolyfillsOptions = {}): Plugin {
       if (id.startsWith(PREFIX)) {
         const importee = id.substr(PREFIX_LENGTH).replace('.js', '');
         return mods.get(importee) || (POLYFILLS as any)[importee + '.js'];
-      } 
+      }
 
     },
     transform(code: string, id: string) {
@@ -83,8 +83,8 @@ export default function (opts: NodePolyfillsOptions = {}): Plugin {
   };
 }
 
-function getRandomId() {
-  return randomBytes(15).toString("hex");
+function getRandomId(prefix: string) {
+  return `\0node-polyfills:${prefix}:${randomBytes(15).toString("hex")}`;
 }
 
 const DIRNAME_PATH = "\0node-polyfills:dirname";

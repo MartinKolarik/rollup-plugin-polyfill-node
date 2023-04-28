@@ -4,7 +4,6 @@ const path = require('path');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const commonjs = require('rollup-plugin-commonjs');
 const json = require('rollup-plugin-json');
-const license = require('rollup-plugin-license');
 const addDefaultExportStatement = require('./rollup-plugin-export-default');
 
 async function main() {
@@ -33,13 +32,6 @@ async function bundleDependency(depName) {
         preferBuiltins: true
       }),
       addDefaultExportStatement(),
-      license({
-        thirdParty: {
-          output: path.join(__dirname, '..', 'polyfills', `LICENSE-${depName}.txt`),
-          includePrivate: true, // Default is false.
-          encoding: 'utf-8', // Default is utf-8.
-        }
-      }),
       json(),
     ],
     external: [

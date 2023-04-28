@@ -6,17 +6,13 @@ const path = require('path');
 const crypto = require('crypto');
 const polyfills = require('./polyfills.js');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-const inject__default = /*#__PURE__*/_interopDefaultLegacy(inject);
-
 // Node import paths use POSIX separators
 const { dirname, relative, join } = path.posix;
 const PREFIX = `\0polyfill-node.`;
 const PREFIX_LENGTH = PREFIX.length;
 function index (opts = {}) {
     const mods = modules.getModules();
-    const injectPlugin = inject__default["default"]({
+    const injectPlugin = inject({
         include: opts.include === undefined ? ['node_modules/**/*.js'] : opts.include,
         exclude: opts.exclude,
         sourceMap: opts.sourceMap,
@@ -56,6 +52,9 @@ function index (opts = {}) {
             if (importee.startsWith(PREFIX)) {
                 importee = importee.substr(PREFIX_LENGTH);
             }
+            if (importee.startsWith('node:')) {
+                importee = importee.substring(5);
+            }
             if (mods.has(importee) || polyfills[importee.replace('.js', '') + '.js']) {
                 return { id: PREFIX + importee.replace('.js', '') + '.js', moduleSideEffects: false };
             }
@@ -73,6 +72,7 @@ function index (opts = {}) {
         transform(code, id) {
             if (id === PREFIX + 'global.js')
                 return;
+            // @ts-ignore
             return injectPlugin.transform.call(this, code, id.replace(PREFIX, path.resolve('node_modules', 'polyfill-node')));
         },
     };

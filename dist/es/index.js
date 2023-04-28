@@ -50,6 +50,9 @@ function index (opts = {}) {
             if (importee.startsWith(PREFIX)) {
                 importee = importee.substr(PREFIX_LENGTH);
             }
+            if (importee.startsWith('node:')) {
+                importee = importee.substring(5);
+            }
             if (mods.has(importee) || POLYFILLS[importee.replace('.js', '') + '.js']) {
                 return { id: PREFIX + importee.replace('.js', '') + '.js', moduleSideEffects: false };
             }
@@ -67,6 +70,7 @@ function index (opts = {}) {
         transform(code, id) {
             if (id === PREFIX + 'global.js')
                 return;
+            // @ts-ignore
             return injectPlugin.transform.call(this, code, id.replace(PREFIX, resolve('node_modules', 'polyfill-node')));
         },
     };

@@ -1,9 +1,9 @@
 const rollup = require('rollup');
 // const fs = require('fs');
 const path = require('path');
-const nodeResolve = require('rollup-plugin-node-resolve');
-const commonjs = require('rollup-plugin-commonjs');
-const json = require('rollup-plugin-json');
+const nodeResolve = require('@rollup/plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
+const json = require('@rollup/plugin-json');
 const addDefaultExportStatement = require('./rollup-plugin-export-default');
 
 async function main() {

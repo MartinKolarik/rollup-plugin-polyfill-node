@@ -34,6 +34,7 @@ export {
   urlResolveObject as resolveObject,
   urlFileURLToPath as fileURLToPath,
   urlFormat as format,
+  urlToHttpOptions,
 
   // WHATWG API
   URL,
@@ -45,6 +46,7 @@ export default {
   resolveObject: urlResolveObject,
   fileURLToPath: urlFileURLToPath,
   format: urlFormat,
+  urlToHttpOptions: urlToHttpOptions,
   Url: Url,
 
   // WHATWG API
@@ -413,6 +415,33 @@ function getPathFromURLPosix(url) {
     }
   }
   return decodeURIComponent(pathname);
+}
+
+function urlToHttpOptions(url) {
+  if (url === null || (typeof url !== 'object' && typeof url !== 'function')) {
+    throw new TypeError('The "url" argument must be of type object.');
+  }
+
+  var options = Object.assign(Object.create(null), url);
+
+  options.protocol = url.protocol;
+  options.hostname = url.hostname && url.hostname[0] === '[' ?
+    url.hostname.slice(1, -1) :
+    url.hostname;
+  options.hash = url.hash;
+  options.search = url.search;
+  options.pathname = url.pathname;
+  options.path = (url.pathname || '') + (url.search || '');
+  options.href = url.href;
+
+  if (url.port !== '') {
+    options.port = Number(url.port);
+  }
+  if (url.username || url.password) {
+    options.auth = decodeURIComponent(url.username) + ':' + decodeURIComponent(url.password);
+  }
+
+  return options;
 }
 
 // format a parsed object into a url string

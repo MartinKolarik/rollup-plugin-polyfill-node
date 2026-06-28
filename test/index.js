@@ -3,6 +3,7 @@ const rollup = require('rollup');
 const nodePolyfills = require('..');
 const os = require('os');
 const constants = require('constants');
+const { URL, URLSearchParams } = require('url');
 const debug = require('debug')('builtins:test');
 const files = [
   'events.js',
@@ -10,6 +11,7 @@ const files = [
   'url-parse.js',
   'url-file-url-to-path.js',
   'url-format.js',
+  'url-to-http-options.js',
   'stream.js',
   'assert.js',
   'constants.js',
@@ -46,6 +48,8 @@ describe('rollup-plugin-node-polyfills', function() {
           setTimeout: setTimeout,
           clearTimeout: clearTimeout,
           console: console,
+          URL: URL,
+          URLSearchParams: URLSearchParams,
           _constants: constants,
           _osEndianness: os.endianness()
         });

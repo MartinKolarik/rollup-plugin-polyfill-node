@@ -55,17 +55,20 @@ export default function (opts: NodePolyfillsOptions = {}): Plugin {
       if (importee && importee.slice(-1) === "/") {
         importee = importee.slice(0, -1);
       }
+      let isInternalPolyfillImport = false;
       if (importer && importer.startsWith(PREFIX) && importee.startsWith('.')) {
+        isInternalPolyfillImport = true;
         importee = PREFIX + join(importer.substr(PREFIX_LENGTH).replace('.js', ''), '..', importee) + '.js';
       }
       if (importee.startsWith(PREFIX)) {
+        isInternalPolyfillImport = true;
         importee = importee.substr(PREFIX_LENGTH);
       }
       if (importee.startsWith('node:')) {
         importee = importee.substring(5);
       }
       const polyfillName = importee.replace('.js', '') + '.js';
-      if (mods.has(importee) || (importee.includes('/') && (POLYFILLS as any)[polyfillName])) {
+      if (mods.has(importee) || (isInternalPolyfillImport && (POLYFILLS as any)[polyfillName])) {
         return { id: PREFIX + importee.replace('.js', '') + '.js', moduleSideEffects: false };
       }
       return null;

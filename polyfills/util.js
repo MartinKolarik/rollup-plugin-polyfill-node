@@ -19,6 +19,9 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 import process from 'process';
+import * as types from './util-types';
+
+export { types };
 
 var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
   function getOwnPropertyDescriptors(obj) {
@@ -32,16 +35,28 @@ var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
 
 var formatRegExp = /%[sdj%]/g;
 export function format(f) {
+  return formatWithInspectOptions(undefined, arguments);
+};
+
+export function formatWithOptions(inspectOptions, f) {
+  var args = [];
+  for (var i = 1; i < arguments.length; i++) {
+    args.push(arguments[i]);
+  }
+  return formatWithInspectOptions(inspectOptions, args);
+};
+
+function formatWithInspectOptions(inspectOptions, args) {
+  var f = args[0];
   if (!isString(f)) {
     var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(inspect(arguments[i]));
+    for (var i = 0; i < args.length; i++) {
+      objects.push(inspect(args[i], inspectOptions));
     }
     return objects.join(' ');
   }
 
   var i = 1;
-  var args = arguments;
   var len = args.length;
   var str = String(f).replace(formatRegExp, function(x) {
     if (x === '%%') return '%';
@@ -63,11 +78,11 @@ export function format(f) {
     if (isNull(x) || !isObject(x)) {
       str += ' ' + x;
     } else {
-      str += ' ' + inspect(x);
+      str += ' ' + inspect(x, inspectOptions);
     }
   }
   return str;
-};
+}
 
 
 // Mark that a method should not be used.
@@ -754,8 +769,10 @@ export default {
   inspect: inspect,
   deprecate: deprecate,
   format: format,
+  formatWithOptions: formatWithOptions,
   debuglog: debuglog,
   stripVTControlCharacters: stripVTControlCharacters,
   promisify: promisify,
   callbackify: callbackify,
+  types: types,
 }

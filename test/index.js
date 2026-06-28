@@ -18,6 +18,7 @@ const files = [
   'os.js',
   'path.js',
   'util-strip-vt-control-characters.js',
+  'util-types-format-with-options.js',
   'string-decoder.js',
   'zlib.js',
   'domain.js',
@@ -59,6 +60,43 @@ describe('rollup-plugin-node-polyfills', function() {
       .catch(done)
     });
   })
+
+  it('tree-shakes individual util.types methods from named imports', function(done) {
+    rollup.rollup({
+      input: 'entry',
+      plugins: [
+        {
+          name: 'entry',
+          resolveId(id) {
+            return id === 'entry' ? id : null;
+          },
+          load(id) {
+            if (id === 'entry') {
+              return "import {types} from 'node:util'; console.log(types.isDate(new Date()));";
+            }
+          }
+        },
+        nodePolyfills({
+          include: null
+        })
+      ],
+      treeshake: true
+    })
+    .then(bundle => bundle.generate({format: 'esm'}))
+    .then(generated => {
+      const code = generated.output[0].code;
+      if (!code.includes('isDate')) {
+        done(new Error('Expected generated code to include the used util.types method'));
+        return;
+      }
+      if (code.includes('isMap')) {
+        done(new Error('Expected generated code to omit unused util.types methods'));
+        return;
+      }
+      done();
+    })
+    .catch(done)
+  });
 
   it('crypto option works (though is broken)', function(done) {
     rollup.rollup({

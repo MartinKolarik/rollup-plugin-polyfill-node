@@ -24,6 +24,10 @@ import {Buffer} from 'buffer';
 
 export { types };
 
+var textEncoderBrand = typeof WeakSet === 'function'
+  ? new WeakSet()
+  : typeof Symbol === 'function' ? Symbol('TextEncoder') : '__TextEncoderBrand__';
+
 var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
   function getOwnPropertyDescriptors(obj) {
     var keys = Object.keys(obj);
@@ -590,6 +594,14 @@ export function TextEncoder() {
   if (!(this instanceof TextEncoder)) {
     throw new TypeError("Class constructor TextEncoder cannot be invoked without 'new'");
   }
+
+  if (textEncoderBrand instanceof WeakSet) {
+    textEncoderBrand.add(this);
+  } else {
+    Object.defineProperty(this, textEncoderBrand, {
+      value: true
+    });
+  }
 }
 
 Object.defineProperty(TextEncoder.prototype, 'encoding', {
@@ -647,7 +659,7 @@ TextEncoder.prototype.encodeInto = function encodeInto(input, destination) {
 };
 
 function assertTextEncoder(value) {
-  if (!(value instanceof TextEncoder)) {
+  if (!value || (textEncoderBrand instanceof WeakSet ? !textEncoderBrand.has(value) : value[textEncoderBrand] !== true)) {
     var err = new TypeError('Value of "this" must be of type TextEncoder');
     err.code = 'ERR_INVALID_THIS';
     throw err;

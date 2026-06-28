@@ -34,6 +34,12 @@ expectTypeError(function () {
   encodingDescriptor.get.call({});
 }, 'Expected TextEncoder#encoding to validate this');
 
+const fakeEncoder = Object.create(TextEncoder.prototype);
+
+expectTypeError(function () {
+  encodingDescriptor.get.call(fakeEncoder);
+}, 'Expected TextEncoder#encoding to reject unbranded receivers');
+
 const encoded = encoder.encode('hello \u2713');
 const expected = [104, 101, 108, 108, 111, 32, 226, 156, 147];
 
@@ -48,6 +54,10 @@ if (encoded.length !== expected.length || expected.some((value, index) => encode
 expectTypeError(function () {
   TextEncoder.prototype.encode.call({});
 }, 'Expected TextEncoder#encode to validate this');
+
+expectTypeError(function () {
+  TextEncoder.prototype.encode.call(fakeEncoder);
+}, 'Expected TextEncoder#encode to reject unbranded receivers');
 
 expectTypeError(function () {
   encoder.encode(Symbol('value'));
@@ -67,6 +77,10 @@ if (destination.slice(0, 6).some((value, index) => value !== expected[index])) {
 expectTypeError(function () {
   TextEncoder.prototype.encodeInto.call({}, 'abc', new Uint8Array(3));
 }, 'Expected TextEncoder#encodeInto to validate this');
+
+expectTypeError(function () {
+  TextEncoder.prototype.encodeInto.call(fakeEncoder, 'abc', new Uint8Array(3));
+}, 'Expected TextEncoder#encodeInto to reject unbranded receivers');
 
 expectTypeError(function () {
   encoder.encodeInto('abc');

@@ -17,6 +17,7 @@ const files = [
   'constants.js',
   'os.js',
   'path.js',
+  'process-to-string-tag.js',
   'util-strip-vt-control-characters.js',
   'util-types-format-with-options.js',
   'util-text-encoder.js',

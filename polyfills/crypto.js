@@ -11,6 +11,8 @@ import createECDH from '\0polyfill-node.__crypto/create-ecdh';
 import * as publicEncryptModule from '\0polyfill-node.__crypto/public-encrypt';
 
 var MAX_RANDOM_FILL_BYTES = 65536;
+var MAX_UINT32 = 4294967295;
+var globalObject = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 var hashes = ['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'md5', 'rmd160'];
 
 export var rng = randomBytes;
@@ -82,9 +84,48 @@ export function privateDecrypt(privateKey, msg) {
   return publicEncryptModule.default.privateDecrypt(privateKey, msg);
 }
 
+function assertRandomFillBuffer(buf) {
+  if (!(buf instanceof globalObject.Uint8Array)) {
+    throw new TypeError('"buf" argument must be a Buffer or Uint8Array');
+  }
+}
+
+function assertRandomFillOffset(offset, length) {
+  if (typeof offset !== 'number' || offset !== offset) {
+    throw new TypeError('offset must be a number');
+  }
+  if (offset > MAX_UINT32 || offset < 0) {
+    throw new TypeError('offset must be a uint32');
+  }
+  if (offset > length) {
+    throw new RangeError('offset out of range');
+  }
+}
+
+function assertRandomFillSize(size, offset, length) {
+  if (typeof size !== 'number' || size !== size) {
+    throw new TypeError('size must be a number');
+  }
+  if (size > MAX_UINT32 || size < 0) {
+    throw new TypeError('size must be a uint32');
+  }
+  if (size + offset > length) {
+    throw new RangeError('buffer too small');
+  }
+}
+
 function chunkedRandomFillSync(buf, offset, size) {
+  assertRandomFillBuffer(buf);
+  assertRandomFillOffset(offset, buf.length);
+  assertRandomFillSize(size, offset, buf.length);
+
+  var crypto = globalObject.crypto || globalObject.msCrypto;
+  if (!crypto || !crypto.getRandomValues) {
+    return randomFillModule.randomFillSync(buf, offset, size);
+  }
+
   for (var generated = 0; generated < size; generated += MAX_RANDOM_FILL_BYTES) {
-    randomFillModule.randomFillSync(buf, offset + generated, Math.min(size - generated, MAX_RANDOM_FILL_BYTES));
+    crypto.getRandomValues(buf.subarray(offset + generated, offset + generated + Math.min(size - generated, MAX_RANDOM_FILL_BYTES)));
   }
   return buf;
 }

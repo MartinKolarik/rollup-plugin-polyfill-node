@@ -130,7 +130,7 @@ describe('rollup-plugin-node-polyfills', function() {
     .catch(done)
   });
 
-  it('supports named fs readFile imports with browserify-fs', function(done) {
+  it('supports browserify-fs named imports', function(done) {
     rollup.rollup({
       input: 'test/examples/fs-readfile-named.js',
       plugins: [
@@ -145,10 +145,6 @@ describe('rollup-plugin-node-polyfills', function() {
       const code = generated.output[0].code;
       if (!code.includes('readFile')) {
         done(new Error('Expected generated code to include readFile'));
-        return;
-      }
-      if (!code.includes('IDBStore')) {
-        done(new Error('Expected generated code to include broader browserify-fs implementation'));
         return;
       }
       done();

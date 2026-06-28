@@ -8,6 +8,7 @@ const os = require('os');
 const constants = require('constants');
 const { URL, URLSearchParams } = require('url');
 const assert = require('assert');
+const nodeCrypto = require('crypto');
 const debug = require('debug')('builtins:test');
 const files = [
   'events.js',
@@ -81,6 +82,7 @@ describe('rollup-plugin-node-polyfills', function() {
           console: console,
           URL: URL,
           URLSearchParams: URLSearchParams,
+          crypto: nodeCrypto.webcrypto,
           _constants: constants,
           _osEndianness: os.endianness()
         });
@@ -128,28 +130,39 @@ describe('rollup-plugin-node-polyfills', function() {
     .catch(done)
   });
 
-  it('crypto option works (though is broken)', function(done) {
+  it('crypto option bundles broader crypto APIs', function(done) {
     rollup.rollup({
-      input: 'test/examples/crypto-broken.js',
+      input: 'test/examples/crypto-browserify.js',
       plugins: [
         nodePolyfills({
           include: null,
           crypto: true
         })
       ]
-    }).then(function() {
-      done(new Error ('should not get here'))
-    }, function (err) {
-      if (
-        err.code === 'MISSING_EXPORT'
-        && err.exporter === '\u0000polyfill-node.crypto.js'
-        && err.message.includes('"diffieHellman" is not exported')
-      ) {
-        done();
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(() => done(), done);
+  });
+
+  it('tree-shakes named crypto randomBytes imports', function(done) {
+    rollup.rollup({
+      input: 'test/examples/crypto-randombytes-named.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ],
+      onwarn() {}
+    })
+    .then(bundle => bundle.generate({format: 'esm'}))
+    .then(generated => {
+      const bytes = Buffer.byteLength(generated.output[0].code, 'utf8');
+      if (bytes > 300000) {
+        done(new Error(`named randomBytes bundle should stay below 300000 bytes, got ${bytes}`));
         return;
       }
-      done(err)
-    });
+      done();
+    }, done);
   });
 
   it('does not replace an explicit inherits package dependency', function(done) {

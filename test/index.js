@@ -141,7 +141,19 @@ describe('rollup-plugin-node-polyfills', function() {
       ]
     })
     .then(bundle => bundle.generate({format: 'cjs'}))
-    .then(() => done(), done);
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      const context = vm.createContext({
+        done: done,
+        setTimeout: setTimeout,
+        clearTimeout: clearTimeout,
+        console: console,
+        crypto: nodeCrypto.webcrypto
+      });
+      context.self = context;
+      script.runInContext(context);
+    })
+    .catch(done);
   });
 
   it('tree-shakes named crypto randomBytes imports', function(done) {
@@ -163,6 +175,31 @@ describe('rollup-plugin-node-polyfills', function() {
       }
       done();
     }, done);
+  });
+
+  it('chunks large crypto randomFill requests', function(done) {
+    rollup.rollup({
+      input: 'test/examples/crypto-randomfill-large.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      const context = vm.createContext({
+        done: done,
+        setTimeout: setTimeout,
+        clearTimeout: clearTimeout,
+        console: console,
+        crypto: nodeCrypto.webcrypto
+      });
+      context.self = context;
+      script.runInContext(context);
+    })
+    .catch(done);
   });
 
   it('does not replace an explicit inherits package dependency', function(done) {

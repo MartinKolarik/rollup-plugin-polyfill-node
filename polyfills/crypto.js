@@ -10,6 +10,7 @@ import * as signAlgos from '\0polyfill-node.__crypto/browserify-sign-algos';
 import createECDH from '\0polyfill-node.__crypto/create-ecdh';
 import * as publicEncryptModule from '\0polyfill-node.__crypto/public-encrypt';
 
+var MAX_RANDOM_FILL_BYTES = 65536;
 var hashes = ['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'md5', 'rmd160'];
 
 export var rng = randomBytes;
@@ -81,8 +82,46 @@ export function privateDecrypt(privateKey, msg) {
   return publicEncryptModule.default.privateDecrypt(privateKey, msg);
 }
 
-export var randomFill = randomFillModule.randomFill;
-export var randomFillSync = randomFillModule.randomFillSync;
+function chunkedRandomFillSync(buf, offset, size) {
+  for (var generated = 0; generated < size; generated += MAX_RANDOM_FILL_BYTES) {
+    randomFillModule.randomFillSync(buf, offset + generated, Math.min(size - generated, MAX_RANDOM_FILL_BYTES));
+  }
+  return buf;
+}
+
+export function randomFill(buf, offset, size, cb) {
+  if (typeof offset === 'function') {
+    cb = offset;
+    offset = 0;
+    size = buf.length;
+  } else if (typeof size === 'function') {
+    cb = size;
+    size = buf.length - offset;
+  } else if (typeof cb !== 'function') {
+    throw new TypeError('"cb" argument must be a function');
+  }
+
+  try {
+    chunkedRandomFillSync(buf, offset, size);
+  } catch (err) {
+    cb(err);
+    return;
+  }
+
+  setTimeout(function() {
+    cb(null, buf);
+  }, 0);
+}
+
+export function randomFillSync(buf, offset, size) {
+  if (typeof offset === 'undefined') {
+    offset = 0;
+  }
+  if (typeof size === 'undefined') {
+    size = buf.length - offset;
+  }
+  return chunkedRandomFillSync(buf, offset, size);
+}
 
 export function createCredentials() {
   throw new Error([

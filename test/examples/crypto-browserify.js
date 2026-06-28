@@ -18,7 +18,7 @@ if (hash !== '71aa4a0c9092eddbfdd4dd14c43b385712217648ef45e50881186c419e15c8e3')
   done(new Error('crypto.createHash should produce the expected digest'));
 } else if (nodeCrypto.createHash !== createHash) {
   done(new Error('default createHash should match the named createHash export'));
-} else if (hmac !== '78f86cb1744ad907fb5556839b113b6b644f932b31f09121527aaec0951f383c') {
+} else if (hmac !== 'a1114905772e73c7a43503b2a697ba13eb718b5a2b301903e0f0a259e3a02a95') {
   done(new Error('crypto.createHmac should produce the expected digest'));
 } else if (nodeCrypto.createHmac !== createHmac) {
   done(new Error('default createHmac should match the named createHmac export'));

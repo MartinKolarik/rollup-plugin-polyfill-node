@@ -20,6 +20,7 @@
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 import process from 'process';
 import * as types from './util-types';
+import {Buffer} from 'buffer';
 
 export { types };
 
@@ -585,6 +586,94 @@ export function stripVTControlCharacters(str) {
   return str.replace(ansi, '');
 }
 
+export function TextEncoder() {
+  if (!(this instanceof TextEncoder)) {
+    throw new TypeError("Class constructor TextEncoder cannot be invoked without 'new'");
+  }
+}
+
+Object.defineProperty(TextEncoder.prototype, 'encoding', {
+  get: function () {
+    assertTextEncoder(this);
+    return 'utf-8';
+  },
+  enumerable: true,
+  configurable: true
+});
+
+TextEncoder.prototype.encode = function encode(input) {
+  assertTextEncoder(this);
+  var string = textEncoderString(input);
+  return new Uint8Array(Buffer.from(string, 'utf8'));
+};
+
+TextEncoder.prototype.encodeInto = function encodeInto(input, destination) {
+  assertTextEncoder(this);
+  assertUint8Array(destination);
+
+  var string = textEncoderString(input);
+  var read = 0;
+  var written = 0;
+
+  for (var i = 0; i < string.length; i++) {
+    var code = string.charCodeAt(i);
+    var charLength = 1;
+    var char = string.charAt(i);
+
+    if (code >= 0xD800 && code <= 0xDBFF && i + 1 < string.length) {
+      var next = string.charCodeAt(i + 1);
+      if (next >= 0xDC00 && next <= 0xDFFF) {
+        charLength = 2;
+        char += string.charAt(i + 1);
+      }
+    }
+
+    var bytes = Buffer.from(char, 'utf8');
+
+    if (written + bytes.length > destination.length) {
+      break;
+    }
+
+    destination.set(bytes, written);
+    written += bytes.length;
+    read += charLength;
+    i += charLength - 1;
+  }
+
+  return {
+    read: read,
+    written: written
+  };
+};
+
+function assertTextEncoder(value) {
+  if (!(value instanceof TextEncoder)) {
+    var err = new TypeError('Value of "this" must be of type TextEncoder');
+    err.code = 'ERR_INVALID_THIS';
+    throw err;
+  }
+}
+
+function assertUint8Array(value) {
+  if (!(value instanceof Uint8Array)) {
+    var err = new TypeError('The "dest" argument must be an instance of Uint8Array.');
+    err.code = 'ERR_INVALID_ARG_TYPE';
+    throw err;
+  }
+}
+
+function textEncoderString(input) {
+  if (input === undefined) {
+    return '';
+  }
+
+  if (typeof input === 'symbol') {
+    throw new TypeError('Cannot convert a Symbol value to a string');
+  }
+
+  return String(input);
+}
+
 function formatInvalidStringArg(value) {
   if (value === undefined) {
     return 'Received undefined';
@@ -772,6 +861,7 @@ export default {
   formatWithOptions: formatWithOptions,
   debuglog: debuglog,
   stripVTControlCharacters: stripVTControlCharacters,
+  TextEncoder: TextEncoder,
   promisify: promisify,
   callbackify: callbackify,
   types: types,

@@ -91,7 +91,7 @@ function assertRandomFillBuffer(buf) {
 }
 
 function assertRandomFillOffset(offset, length) {
-  if (typeof offset !== 'number' || offset !== offset) {
+  if (typeof offset !== 'number' || isNaN(offset)) {
     throw new TypeError('offset must be a number');
   }
   if (offset > MAX_UINT32 || offset < 0) {
@@ -103,7 +103,7 @@ function assertRandomFillOffset(offset, length) {
 }
 
 function assertRandomFillSize(size, offset, length) {
-  if (typeof size !== 'number' || size !== size) {
+  if (typeof size !== 'number' || isNaN(size)) {
     throw new TypeError('size must be a number');
   }
   if (size > MAX_UINT32 || size < 0) {

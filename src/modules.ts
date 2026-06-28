@@ -38,9 +38,8 @@ export function getModules() {
   // TODO: Decide if we want to implement these or not
   // currently causing trouble in tests
   libs.set('fs', EMPTY_PATH);
-  libs.set('crypto', EMPTY_PATH);
+  libs.set('crypto', POLYFILLS['crypto.js']);
   // libs.set('fs', POLYFILLS['browserify-fs.js']);
-  // libs.set('crypto', POLYFILLS['crypto-browserify.js']);
 
   // TODO: No good polyfill exists yet
   libs.set('http2', EMPTY_PATH);

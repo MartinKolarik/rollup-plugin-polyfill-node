@@ -11,7 +11,17 @@ async function main() {
     bundleDependency('process-es6'),
     bundleDependency('buffer-es6'),
     // bundleDependency('browserify-fs'),
-    // bundleDependency('crypto-browserify'),
+    bundleDependency('randombytes', '__crypto/randombytes.js'),
+    bundleDependency('randomfill', '__crypto/randomfill.js'),
+    bundleDependency('create-hash', '__crypto/create-hash.js'),
+    bundleDependency('create-hmac', '__crypto/create-hmac.js'),
+    bundleDependency('pbkdf2', '__crypto/pbkdf2.js'),
+    bundleDependency('browserify-cipher', '__crypto/browserify-cipher.js'),
+    bundleDependency('diffie-hellman', '__crypto/diffie-hellman.js'),
+    bundleDependency('browserify-sign', '__crypto/browserify-sign.js'),
+    bundleDependency('browserify-sign/algos', '__crypto/browserify-sign-algos.js'),
+    bundleDependency('create-ecdh', '__crypto/create-ecdh.js'),
+    bundleDependency('public-encrypt', '__crypto/public-encrypt.js'),
   ])
   patchProcessToStringTag();
 
@@ -23,7 +33,7 @@ async function main() {
   // fs.writeFileSync(cryptoPolyfillLoc, cryptoPolyfill`, 'utf8'`)
 }
 
-async function bundleDependency(depName) {
+async function bundleDependency(depName, outFile = depName + '.js') {
   const bundle = await rollup.rollup({
     input: depName,
     plugins: [
@@ -48,7 +58,7 @@ async function bundleDependency(depName) {
 
   await bundle.write({
     format: 'esm',
-    file: path.join('polyfills', depName + '.js')
+    file: path.join('polyfills', outFile)
   });
 }
 

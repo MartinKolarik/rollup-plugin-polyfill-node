@@ -1,4 +1,6 @@
+.idea
 .DS_Store
+.worktrees
 lib
 dist
 node_modules

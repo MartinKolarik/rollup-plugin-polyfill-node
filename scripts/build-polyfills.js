@@ -56,8 +56,13 @@ function patchProcessToStringTag() {
   const processPolyfillLoc = path.join(__dirname, '../polyfills/process-es6.js');
   let processPolyfill = fs.readFileSync(processPolyfillLoc, 'utf8');
   const marker = 'export { addListener';
+  const defaultExportMatch = processPolyfill.match(/,\s*([A-Za-z_$][\w$]*)\s+as\s+default,/);
+  if (!defaultExportMatch) {
+    throw new Error('Unable to find process-es6 default export binding');
+  }
+  const defaultExportName = defaultExportMatch[1];
   const patch = `if (typeof Symbol === 'function' && Symbol.toStringTag) {
-  Object.defineProperty(browser$1, Symbol.toStringTag, {
+  Object.defineProperty(${defaultExportName}, Symbol.toStringTag, {
     value: 'process',
     enumerable: false,
     writable: true,

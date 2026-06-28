@@ -194,7 +194,7 @@ function uptime() {
   return dif / 1000;
 }
 
-var browser$1 = {
+var browser_default = {
   nextTick: nextTick,
   title: title,
   browser: browser,
@@ -220,4 +220,13 @@ var browser$1 = {
   uptime: uptime
 };
 
-export { addListener, argv, binding, browser, chdir, config, cwd, browser$1 as default, emit, env, hrtime, nextTick, off, on, once, platform, release, removeAllListeners, removeListener, title, umask, uptime, version, versions };
+if (typeof Symbol === 'function' && Symbol.toStringTag) {
+  Object.defineProperty(browser_default, Symbol.toStringTag, {
+    value: 'process',
+    enumerable: false,
+    writable: true,
+    configurable: false
+  });
+}
+
+export { addListener, argv, binding, browser, chdir, config, cwd, browser_default as default, emit, env, hrtime, nextTick, off, on, once, platform, release, removeAllListeners, removeListener, title, umask, uptime, version, versions };

@@ -64,7 +64,8 @@ export default function (opts: NodePolyfillsOptions = {}): Plugin {
       if (importee.startsWith('node:')) {
         importee = importee.substring(5);
       }
-      if (mods.has(importee) || (POLYFILLS as any)[importee.replace('.js', '') + '.js']) {
+      const polyfillName = importee.replace('.js', '') + '.js';
+      if (mods.has(importee) || (importee.includes('/') && (POLYFILLS as any)[polyfillName])) {
         return { id: PREFIX + importee.replace('.js', '') + '.js', moduleSideEffects: false };
       }
       return null;

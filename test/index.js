@@ -1,6 +1,9 @@
 const vm = require('vm');
+const path = require('path');
 const rollup = require('rollup');
 const nodePolyfills = require('..');
+const commonjs = require('@rollup/plugin-commonjs');
+const resolve = require('@rollup/plugin-node-resolve').nodeResolve;
 const os = require('os');
 const constants = require('constants');
 const debug = require('debug')('builtins:test');
@@ -74,5 +77,37 @@ describe('rollup-plugin-node-polyfills', function() {
       }
       done(err)
     });
+  });
+
+  it('does not replace an explicit inherits package dependency', function(done) {
+    rollup.rollup({
+      input: 'test/examples/explicit-inherits.js',
+      plugins: [
+        commonjs(),
+        nodePolyfills(),
+        {
+          name: 'explicit-inherits-fixture',
+          resolveId(importee) {
+            if (importee === 'inherits') {
+              return path.resolve('test/fixtures/inherits/index.js');
+            }
+            return null;
+          }
+        },
+        resolve({
+          preferBuiltins: true,
+          browser: true,
+        }),
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'iife', name: 'app'}))
+    .then(generated => {
+      const code = generated.output[0].code;
+      debug(code);
+      const script = new vm.Script(code);
+      script.runInContext(vm.createContext({}));
+      done();
+    })
+    .catch(done)
   });
 })

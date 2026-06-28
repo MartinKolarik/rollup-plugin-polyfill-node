@@ -19,6 +19,7 @@ const files = [
   'path.js',
   'util-strip-vt-control-characters.js',
   'util-types-format-with-options.js',
+  'util-text-encoder.js',
   'string-decoder.js',
   'zlib.js',
   'domain.js',

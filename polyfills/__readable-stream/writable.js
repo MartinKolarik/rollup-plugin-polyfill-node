@@ -7,7 +7,6 @@ import {inherits, deprecate} from 'util';
 import {Buffer} from 'buffer';
 Writable.WritableState = WritableState;
 import {EventEmitter} from 'events';
-import {Duplex} from '\0polyfill-node._stream_duplex';
 import {nextTick} from 'process';
 inherits(Writable, EventEmitter);
 
@@ -32,7 +31,7 @@ function WritableState(options, stream) {
   // contains buffers or objects.
   this.objectMode = !!options.objectMode;
 
-  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
+  if (stream && stream._isDuplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
 
   // the point at which write() starts returning false
   // Note: 0 is a valid value, means that we always return false if
@@ -133,7 +132,7 @@ export function Writable(options) {
 
   // Writable ctor is applied to Duplexes, though they're not
   // instanceof Writable, they're instanceof Readable.
-  if (!(this instanceof Writable) && !(this instanceof Duplex)) return new Writable(options);
+  if (!(this instanceof Writable) && !(this && this._isDuplex)) return new Writable(options);
 
   this._writableState = new WritableState(options, this);
 

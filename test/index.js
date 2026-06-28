@@ -7,6 +7,7 @@ const resolve = require('@rollup/plugin-node-resolve').nodeResolve;
 const os = require('os');
 const constants = require('constants');
 const { URL, URLSearchParams } = require('url');
+const assert = require('assert');
 const debug = require('debug')('builtins:test');
 const files = [
   'events.js',
@@ -33,6 +34,29 @@ const files = [
 describe('rollup-plugin-node-polyfills', function() {
   
   this.timeout(5000);
+
+  it('does not warn about stream polyfill circular dependencies', function () {
+    const warnings = [];
+
+    return rollup.rollup({
+      input: 'test/examples/stream.js',
+      onwarn(warning) {
+        warnings.push(warning);
+      },
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(() => {
+      assert.deepStrictEqual(
+        warnings.filter(warning => warning.code === 'CIRCULAR_DEPENDENCY').map(warning => warning.message),
+        []
+      );
+    });
+  });
 
   files.forEach((file) => {
     it('works with ' + file, function (done) {

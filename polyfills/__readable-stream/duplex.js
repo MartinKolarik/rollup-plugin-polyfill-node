@@ -16,8 +16,10 @@ export default Duplex;
 export function Duplex(options) {
   if (!(this instanceof Duplex)) return new Duplex(options);
 
+  this._isDuplex = true;
   Readable.call(this, options);
   Writable.call(this, options);
+  delete this._isDuplex;
 
   if (options && options.readable === false) this.readable = false;
 

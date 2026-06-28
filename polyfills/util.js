@@ -550,6 +550,50 @@ export function log() {
   console.log('%s - %s', timestamp(), format.apply(null, arguments));
 }
 
+// Matches Node's util.stripVTControlCharacters ANSI/VT escape pattern.
+var ansi = new RegExp(
+  '[\\u001B\\u009B][[\\]()#;?]*' +
+  '(?:(?:(?:(?:;[-a-zA-Z\\d\\/\\#&.:=?%@~_]+)*' +
+  '|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/\\#&.:=?%@~_]*)*)?' +
+  '(?:\\u0007|\\u001B\\u005C|\\u009C))' +
+  '|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?' +
+  '[\\dA-PR-TZcf-nq-uy=><~]))', 'g'
+);
+
+export function stripVTControlCharacters(str) {
+  if (typeof str !== 'string') {
+    var err = new TypeError('The "str" argument must be of type string. ' + formatInvalidStringArg(str));
+    err.code = 'ERR_INVALID_ARG_TYPE';
+    throw err;
+  }
+
+  return str.replace(ansi, '');
+}
+
+function formatInvalidStringArg(value) {
+  if (value === undefined) {
+    return 'Received undefined';
+  }
+
+  if (value === null) {
+    return 'Received null';
+  }
+
+  if (typeof value === 'function') {
+    return 'Received function';
+  }
+
+  if (typeof value === 'object') {
+    return 'Received an instance of Object';
+  }
+
+  if (typeof value === 'bigint') {
+    return 'Received type bigint (' + value + 'n)';
+  }
+
+  return 'Received type ' + typeof value + ' (' + String(value) + ')';
+}
+
 
 /**
  * Inherit the prototype methods from one constructor into another.
@@ -711,6 +755,7 @@ export default {
   deprecate: deprecate,
   format: format,
   debuglog: debuglog,
+  stripVTControlCharacters: stripVTControlCharacters,
   promisify: promisify,
   callbackify: callbackify,
 }

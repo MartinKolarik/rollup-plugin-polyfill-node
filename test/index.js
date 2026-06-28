@@ -34,7 +34,7 @@ const files = [
 ];
 
 describe('rollup-plugin-node-polyfills', function() {
-  
+
   this.timeout(5000);
 
   it('does not warn about stream polyfill circular dependencies', function () {
@@ -123,6 +123,32 @@ describe('rollup-plugin-node-polyfills', function() {
       }
       if (code.includes('isMap')) {
         done(new Error('Expected generated code to omit unused util.types methods'));
+        return;
+      }
+      done();
+    })
+    .catch(done)
+  });
+
+  it('supports named fs readFile imports with browserify-fs', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-readfile-named.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ],
+      treeshake: true
+    })
+    .then(bundle => bundle.generate({format: 'esm'}))
+    .then(generated => {
+      const code = generated.output[0].code;
+      if (!code.includes('readFile')) {
+        done(new Error('Expected generated code to include readFile'));
+        return;
+      }
+      if (!code.includes('IDBStore')) {
+        done(new Error('Expected generated code to include broader browserify-fs implementation'));
         return;
       }
       done();

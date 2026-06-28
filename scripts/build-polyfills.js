@@ -10,7 +10,7 @@ async function main() {
   await Promise.all([
     bundleDependency('process-es6'),
     bundleDependency('buffer-es6'),
-    // bundleDependency('browserify-fs'),
+    bundleDependency('browserify-fs', '__fs/browserify-fs.js'),
     bundleDependency('randombytes', '__crypto/randombytes.js'),
     bundleDependency('randomfill', '__crypto/randomfill.js'),
     bundleDependency('create-hash', '__crypto/create-hash.js'),

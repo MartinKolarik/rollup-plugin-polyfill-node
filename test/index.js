@@ -26,6 +26,7 @@ const files = [
   'util-types-format-with-options.js',
   'util-text-encoder.js',
   'string-decoder.js',
+  'string-decoder-default.js',
   'zlib.js',
   'domain.js',
   'crypto.js'

@@ -16,10 +16,16 @@ export default Duplex;
 export function Duplex(options) {
   if (!(this instanceof Duplex)) return new Duplex(options);
 
+  var hasIsDuplex = Object.prototype.hasOwnProperty.call(this, '_isDuplex');
+  var isDuplex = this._isDuplex;
   this._isDuplex = true;
-  Readable.call(this, options);
-  Writable.call(this, options);
-  delete this._isDuplex;
+  try {
+    Readable.call(this, options);
+    Writable.call(this, options);
+  } finally {
+    if (hasIsDuplex) this._isDuplex = isDuplex;
+    else delete this._isDuplex;
+  }
 
   if (options && options.readable === false) this.readable = false;
 

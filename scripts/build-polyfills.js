@@ -1,5 +1,5 @@
 const rollup = require('rollup');
-// const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const nodeResolve = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
@@ -13,6 +13,7 @@ async function main() {
     // bundleDependency('browserify-fs'),
     // bundleDependency('crypto-browserify'),
   ])
+  patchProcessToStringTag();
 
   // quick and dirty find-replace
   // const cryptoPolyfillLoc = path.join(__dirname, '../polyfills/crypto-browserify.js');
@@ -49,6 +50,29 @@ async function bundleDependency(depName) {
     format: 'esm',
     file: path.join('polyfills', depName + '.js')
   });
+}
+
+function patchProcessToStringTag() {
+  const processPolyfillLoc = path.join(__dirname, '../polyfills/process-es6.js');
+  let processPolyfill = fs.readFileSync(processPolyfillLoc, 'utf8');
+  const marker = 'export { addListener';
+  const patch = `if (typeof Symbol === 'function' && Symbol.toStringTag) {
+  Object.defineProperty(browser$1, Symbol.toStringTag, {
+    value: 'process',
+    enumerable: false,
+    writable: true,
+    configurable: false
+  });
+}
+
+`;
+  if (!processPolyfill.includes(patch)) {
+    if (!processPolyfill.includes(marker)) {
+      throw new Error('Unable to patch process-es6 Symbol.toStringTag');
+    }
+    processPolyfill = processPolyfill.replace(marker, patch + marker);
+    fs.writeFileSync(processPolyfillLoc, processPolyfill, 'utf8');
+  }
 }
 
 main();

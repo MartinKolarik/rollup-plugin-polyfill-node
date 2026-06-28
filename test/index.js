@@ -15,6 +15,7 @@ const files = [
   'constants.js',
   'os.js',
   'path.js',
+  'process-to-string-tag.js',
   'util-strip-vt-control-characters.js',
   'string-decoder.js',
   'zlib.js',

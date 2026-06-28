@@ -1,7 +1,11 @@
-import {stripVTControlCharacters} from 'node:util';
+import util, {stripVTControlCharacters} from 'node:util';
 
 if (stripVTControlCharacters('\u001B[31mred\u001B[0m') !== 'red') {
   throw new Error('Expected VT control characters to be stripped');
+}
+
+if (util.stripVTControlCharacters('\u001B[31mred\u001B[0m') !== 'red') {
+  throw new Error('Expected default util export to expose stripVTControlCharacters');
 }
 
 try {
@@ -22,7 +26,7 @@ try {
 } catch (err) {
   if (
     err.code !== 'ERR_INVALID_ARG_TYPE'
-    || err.message !== 'The "str" argument must be of type string. Received an instance of String'
+    || err.message !== 'The "str" argument must be of type string. Received an instance of Object'
   ) {
     throw err;
   }

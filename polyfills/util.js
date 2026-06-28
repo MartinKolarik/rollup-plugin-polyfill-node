@@ -580,12 +580,11 @@ function formatInvalidStringArg(value) {
   }
 
   if (typeof value === 'function') {
-    return 'Received function ' + (value.name || '');
+    return 'Received function';
   }
 
   if (typeof value === 'object') {
-    var ctor = value.constructor && value.constructor.name;
-    return 'Received an instance of ' + (ctor || 'Object');
+    return 'Received an instance of Object';
   }
 
   if (typeof value === 'bigint') {

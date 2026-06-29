@@ -35,12 +35,9 @@ function getModules() {
     libs.set('zlib', polyfills['zlib.js']);
     libs.set('tty', polyfills['tty.js']);
     libs.set('domain', polyfills['domain.js']);
-    // TODO: Decide if we want to implement these or not
-    // currently causing trouble in tests
-    libs.set('fs', EMPTY_PATH);
-    libs.set('crypto', EMPTY_PATH);
-    // libs.set('fs', POLYFILLS['browserify-fs.js']);
-    libs.set('crypto', polyfills['crypto-browserify.js']);
+    libs.set('fs', polyfills['fs.js']);
+    libs.set('fs/promises', polyfills['fs-promises.js']);
+    libs.set('crypto', polyfills['crypto.js']);
     // TODO: No good polyfill exists yet
     libs.set('http2', EMPTY_PATH);
     // not shimmed

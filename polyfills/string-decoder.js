@@ -76,9 +76,6 @@ export function StringDecoder(encoding) {
   this.charLength = 0;
 };
 
-export default StringDecoder;
-
-
 // write decodes the given buffer and returns it as JS string that is
 // guaranteed to not contain any partial multi-byte characters. Any partial
 // character found at the end of the buffer is buffered up, and will be

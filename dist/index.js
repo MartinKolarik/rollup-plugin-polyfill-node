@@ -46,16 +46,20 @@ function index (opts = {}) {
             if (importee && importee.slice(-1) === "/") {
                 importee = importee.slice(0, -1);
             }
+            let isInternalPolyfillImport = false;
             if (importer && importer.startsWith(PREFIX) && importee.startsWith('.')) {
+                isInternalPolyfillImport = true;
                 importee = PREFIX + join(importer.substr(PREFIX_LENGTH).replace('.js', ''), '..', importee) + '.js';
             }
             if (importee.startsWith(PREFIX)) {
+                isInternalPolyfillImport = true;
                 importee = importee.substr(PREFIX_LENGTH);
             }
             if (importee.startsWith('node:')) {
                 importee = importee.substring(5);
             }
-            if (mods.has(importee) || polyfills[importee.replace('.js', '') + '.js']) {
+            const polyfillName = importee.replace('.js', '') + '.js';
+            if (mods.has(importee) || (isInternalPolyfillImport && polyfills[polyfillName])) {
                 return { id: PREFIX + importee.replace('.js', '') + '.js', moduleSideEffects: false };
             }
             return null;

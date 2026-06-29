@@ -3458,7 +3458,15 @@ var isarray = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-var streamBrowser = require$$0$1.EventEmitter;
+var streamBrowser;
+var hasRequiredStreamBrowser;
+
+function requireStreamBrowser () {
+	if (hasRequiredStreamBrowser) return streamBrowser;
+	hasRequiredStreamBrowser = 1;
+	streamBrowser = require$$0$1.EventEmitter;
+	return streamBrowser;
+}
 
 var safeBuffer$1 = {exports: {}};
 
@@ -3928,7 +3936,7 @@ function require_stream_writable () {
 	/*</replacement>*/
 
 	/*<replacement>*/
-	var Stream = streamBrowser;
+	var Stream = requireStreamBrowser();
 	/*</replacement>*/
 
 	/*<replacement>*/
@@ -5043,7 +5051,7 @@ function require_stream_readable () {
 	/*</replacement>*/
 
 	/*<replacement>*/
-	var Stream = streamBrowser;
+	var Stream = requireStreamBrowser();
 	/*</replacement>*/
 
 	/*<replacement>*/

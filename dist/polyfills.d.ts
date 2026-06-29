@@ -1,4 +1,16 @@
 declare const _default: {
+    "__crypto/browserify-cipher.js": string;
+    "__crypto/browserify-sign-algos.js": string;
+    "__crypto/browserify-sign.js": string;
+    "__crypto/create-ecdh.js": string;
+    "__crypto/create-hash.js": string;
+    "__crypto/create-hmac.js": string;
+    "__crypto/diffie-hellman.js": string;
+    "__crypto/pbkdf2.js": string;
+    "__crypto/public-encrypt.js": string;
+    "__crypto/randombytes.js": string;
+    "__crypto/randomfill.js": string;
+    "__fs/browserify-fs.js": string;
     "__http-lib/capability.js": string;
     "__http-lib/request.js": string;
     "__http-lib/response.js": string;
@@ -26,9 +38,12 @@ declare const _default: {
     "console.js": string;
     "constants.js": string;
     "crypto-browserify.js": string;
+    "crypto.js": string;
     "domain.js": string;
     "empty.js": string;
     "events.js": string;
+    "fs-promises.js": string;
+    "fs.js": string;
     "global.js": string;
     "http.js": string;
     "inherits.js": string;
@@ -47,6 +62,7 @@ declare const _default: {
     "timers.js": string;
     "tty.js": string;
     "url.js": string;
+    "util-types.js": string;
     "util.js": string;
     "vm.js": string;
     "zlib.js": string;

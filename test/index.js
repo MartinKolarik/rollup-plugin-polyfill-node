@@ -34,7 +34,7 @@ const files = [
 ];
 
 describe('rollup-plugin-node-polyfills', function() {
-  
+
   this.timeout(5000);
 
   it('does not warn about stream polyfill circular dependencies', function () {
@@ -125,6 +125,103 @@ describe('rollup-plugin-node-polyfills', function() {
         done(new Error('Expected generated code to omit unused util.types methods'));
         return;
       }
+      done();
+    })
+    .catch(done)
+  });
+
+  it('supports browserify-fs named imports', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-readfile-named.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ],
+      treeshake: true
+    })
+    .then(bundle => bundle.generate({format: 'esm'}))
+    .then(generated => {
+      const code = generated.output[0].code;
+      if (!code.includes('readFile')) {
+        done(new Error('Expected generated code to include readFile'));
+        return;
+      }
+      done();
+    })
+    .catch(done)
+  });
+
+  it('does not initialize browserify-fs for unused fs imports', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-import.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      script.runInContext(vm.createContext({}));
+      done();
+    })
+    .catch(done)
+  });
+
+  it('supports the broader fs module surface without initialization', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-surface.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      script.runInContext(vm.createContext({}));
+      done();
+    })
+    .catch(done)
+  });
+
+  it('supports fs/promises named imports without initialization', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-promises.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      script.runInContext(vm.createContext({}));
+      done();
+    })
+    .catch(done)
+  });
+
+  it('throws a clear error when fs is called without IndexedDB', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-call-non-browser.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      assert.throws(
+        () => script.runInContext(vm.createContext({})),
+        /fs polyfill requires an IndexedDB-compatible browser runtime/
+      );
       done();
     })
     .catch(done)

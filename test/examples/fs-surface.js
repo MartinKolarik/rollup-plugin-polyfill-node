@@ -50,18 +50,10 @@ try {
   }
 }
 
-if (typeof fs.promises.watch !== 'function') {
-  throw new Error('Expected promises.watch to be a function');
+if (typeof fs.promises.watch !== 'undefined') {
+  throw new Error('Expected unsupported promises.watch to be undefined');
 }
 
-var watchPromise = fs.promises.watch('/test.txt');
-if (!watchPromise || typeof watchPromise.catch !== 'function') {
-  throw new Error('Expected promises.watch to return a rejected Promise');
+if (typeof fs.promises.copyFile !== 'undefined') {
+  throw new Error('Expected unsupported promises.copyFile to be undefined');
 }
-watchPromise.catch(function() {});
-
-var copyFilePromise = fs.promises.copyFile('/from.txt', '/to.txt');
-if (!copyFilePromise || typeof copyFilePromise.catch !== 'function') {
-  throw new Error('Expected promises.copyFile to return a rejected Promise');
-}
-copyFilePromise.catch(function() {});

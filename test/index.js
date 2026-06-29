@@ -188,6 +188,24 @@ describe('rollup-plugin-node-polyfills', function() {
     .catch(done)
   });
 
+  it('supports fs/promises named imports without initialization', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-promises.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      script.runInContext(vm.createContext({}));
+      done();
+    })
+    .catch(done)
+  });
+
   it('throws a clear error when fs is called without IndexedDB', function(done) {
     rollup.rollup({
       input: 'test/examples/fs-call-non-browser.js',

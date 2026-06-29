@@ -81,12 +81,6 @@ function callFs(method, args) {
   return getAvailableFs()[method].apply(null, args);
 }
 
-function unsupportedPromise(name) {
-  return function() {
-    return Promise.reject(new Error('fs.' + name + ' is not supported by the browserify-fs polyfill'));
-  };
-}
-
 function promisify(method) {
   return function() {
     var args = Array.prototype.slice.call(arguments);
@@ -263,16 +257,16 @@ export var promises = {
   unlink: promisify('unlink'),
   utimes: promisify('utimes'),
   writeFile: promisify('writeFile'),
-  copyFile: unsupportedPromise('promises.copyFile'),
-  cp: unsupportedPromise('promises.cp'),
-  glob: unsupportedPromise('promises.glob'),
-  lutimes: unsupportedPromise('promises.lutimes'),
-  mkdtemp: unsupportedPromise('promises.mkdtemp'),
-  open: unsupportedPromise('promises.open'),
-  opendir: unsupportedPromise('promises.opendir'),
-  rm: unsupportedPromise('promises.rm'),
-  statfs: unsupportedPromise('promises.statfs'),
-  watch: unsupportedPromise('promises.watch')
+  copyFile: copyFile,
+  cp: cp,
+  glob: glob,
+  lutimes: lutimes,
+  mkdtemp: mkdtemp,
+  open: undefined,
+  opendir: opendir,
+  rm: rm,
+  statfs: statfs,
+  watch: undefined
 };
 
 export default {

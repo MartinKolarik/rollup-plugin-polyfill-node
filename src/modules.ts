@@ -36,6 +36,7 @@ export function getModules() {
   libs.set('domain', POLYFILLS['domain.js']);
 
   libs.set('fs', POLYFILLS['fs.js']);
+  libs.set('fs/promises', POLYFILLS['fs-promises.js']);
   libs.set('crypto', POLYFILLS['crypto.js']);
 
   // TODO: No good polyfill exists yet

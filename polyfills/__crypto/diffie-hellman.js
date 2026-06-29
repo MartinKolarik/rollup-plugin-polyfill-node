@@ -1966,7 +1966,7 @@ bn$2.exports;
 	    }
 
 	    assert(carry === 0);
-	    assert((carry & ~0x1fff) === 0);
+	    assert((carry & -8192) === 0);
 	  };
 
 	  FFTM.prototype.stub = function stub (N) {
@@ -5418,7 +5418,7 @@ bn$1.exports;
 	    }
 
 	    assert(carry === 0);
-	    assert((carry & ~0x1fff) === 0);
+	    assert((carry & -8192) === 0);
 	  };
 
 	  FFTM.prototype.stub = function stub (N) {

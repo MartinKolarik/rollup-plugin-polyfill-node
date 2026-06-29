@@ -23,24 +23,24 @@ var sha512WithRSAEncryption = {
 	id: "3051300d060960864801650304020305000440"
 };
 var sha256 = {
-	sign: "ecdsa",
+	sign: "ecdsa/rsa",
 	hash: "sha256",
-	id: ""
+	id: "3031300d060960864801650304020105000420"
 };
 var sha224 = {
-	sign: "ecdsa",
+	sign: "ecdsa/rsa",
 	hash: "sha224",
-	id: ""
+	id: "302d300d06096086480165030402040500041c"
 };
 var sha384 = {
-	sign: "ecdsa",
+	sign: "ecdsa/rsa",
 	hash: "sha384",
-	id: ""
+	id: "3041300d060960864801650304020205000430"
 };
 var sha512 = {
-	sign: "ecdsa",
+	sign: "ecdsa/rsa",
 	hash: "sha512",
-	id: ""
+	id: "3051300d060960864801650304020305000440"
 };
 var DSA = {
 	sign: "dsa",
@@ -168,6 +168,6 @@ var require$$0 = {
 
 var algos = require$$0;
 
-var algos$1 = /*@__PURE__*/getDefaultExportFromCjs(algos);
+var algos_default = /*@__PURE__*/getDefaultExportFromCjs(algos);
 
-export { algos$1 as default };
+export { algos_default as default };

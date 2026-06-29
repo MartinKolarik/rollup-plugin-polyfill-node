@@ -6,7 +6,7 @@ function getDefaultExportFromCjs (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
 
-var browser$1 = {exports: {}};
+var browser = {exports: {}};
 
 var safeBuffer = {exports: {}};
 
@@ -97,9 +97,9 @@ var Buffer = safeBufferExports.Buffer;
 var crypto = commonjsGlobal.crypto || commonjsGlobal.msCrypto;
 
 if (crypto && crypto.getRandomValues) {
-  browser$1.exports = randomBytes;
+  browser.exports = randomBytes;
 } else {
-  browser$1.exports = oldBrowser;
+  browser.exports = oldBrowser;
 }
 
 function randomBytes (size, cb) {
@@ -130,7 +130,7 @@ function randomBytes (size, cb) {
   return bytes
 }
 
-var browserExports = browser$1.exports;
-var browser = /*@__PURE__*/getDefaultExportFromCjs(browserExports);
+var browserExports = browser.exports;
+var browser_default = /*@__PURE__*/getDefaultExportFromCjs(browserExports);
 
-export { browser as default };
+export { browser_default as default };

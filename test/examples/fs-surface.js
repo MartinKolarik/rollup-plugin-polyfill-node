@@ -4,6 +4,7 @@ import fs, {
   existsSync,
   promises,
   readFileSync,
+  W_OK,
   writeFileSync
 } from 'fs';
 
@@ -11,16 +12,16 @@ if (typeof access !== 'function') {
   throw new Error('Expected access to be a function');
 }
 
-if (typeof readFileSync !== 'function') {
-  throw new Error('Expected readFileSync to be a function');
+if (typeof readFileSync !== 'undefined') {
+  throw new Error('Expected unsupported readFileSync to be undefined');
 }
 
-if (typeof writeFileSync !== 'function') {
-  throw new Error('Expected writeFileSync to be a function');
+if (typeof writeFileSync !== 'undefined') {
+  throw new Error('Expected unsupported writeFileSync to be undefined');
 }
 
-if (typeof existsSync !== 'function') {
-  throw new Error('Expected existsSync to be a function');
+if (typeof existsSync !== 'undefined' || typeof fs.existsSync !== 'undefined') {
+  throw new Error('Expected unsupported existsSync to be undefined');
 }
 
 if (constants.F_OK !== 0 || fs.constants.F_OK !== 0) {
@@ -30,3 +31,28 @@ if (constants.F_OK !== 0 || fs.constants.F_OK !== 0) {
 if (typeof promises.readFile !== 'function' || typeof fs.promises.readFile !== 'function') {
   throw new Error('Expected promises API to be exported');
 }
+
+let accessError;
+access('/test.txt', W_OK, function(err) {
+  accessError = err;
+});
+
+if (!accessError || !/only supports F_OK/.test(accessError.message)) {
+  throw new Error('Expected unsupported fs.access modes to fail clearly');
+}
+
+if (typeof fs.promises.watch !== 'function') {
+  throw new Error('Expected promises.watch to be a function');
+}
+
+var watchPromise = fs.promises.watch('/test.txt');
+if (!watchPromise || typeof watchPromise.catch !== 'function') {
+  throw new Error('Expected promises.watch to return a rejected Promise');
+}
+watchPromise.catch(function() {});
+
+var copyFilePromise = fs.promises.copyFile('/from.txt', '/to.txt');
+if (!copyFilePromise || typeof copyFilePromise.catch !== 'function') {
+  throw new Error('Expected promises.copyFile to return a rejected Promise');
+}
+copyFilePromise.catch(function() {});

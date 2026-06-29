@@ -81,9 +81,9 @@ function callFs(method, args) {
   return getAvailableFs()[method].apply(null, args);
 }
 
-function unsupported(name) {
+function unsupportedPromise(name) {
   return function() {
-    throw new Error('fs.' + name + ' is not supported by the browserify-fs polyfill');
+    return Promise.reject(new Error('fs.' + name + ' is not supported by the browserify-fs polyfill'));
   };
 }
 
@@ -108,9 +108,23 @@ function promisify(method) {
 export function access(path, mode, cb) {
   if (typeof mode === 'function') {
     cb = mode;
+    mode = F_OK;
+  } else if (typeof mode === 'undefined') {
+    mode = F_OK;
   }
 
-  return callFs('stat', [path, cb]);
+  if (mode !== F_OK) {
+    var err = new Error('fs.access only supports F_OK with the browserify-fs polyfill');
+    if (typeof cb !== 'function') {
+      throw err;
+    }
+
+    return cb(err);
+  }
+
+  return callFs('stat', [path, function(err) {
+    cb(err);
+  }]);
 }
 
 export function appendFile() { return callFs('appendFile', arguments); }
@@ -151,74 +165,82 @@ export function watchFile() { return callFs('watchFile', arguments); }
 export function write() { return callFs('write', arguments); }
 export function writeFile() { return callFs('writeFile', arguments); }
 
-export var accessSync = unsupported('accessSync');
-export var appendFileSync = unsupported('appendFileSync');
-export var chmodSync = unsupported('chmodSync');
-export var chownSync = unsupported('chownSync');
-export var closeSync = unsupported('closeSync');
-export var copyFile = unsupported('copyFile');
-export var copyFileSync = unsupported('copyFileSync');
-export var cp = unsupported('cp');
-export var cpSync = unsupported('cpSync');
-export var existsSync = unsupported('existsSync');
-export var fchmodSync = unsupported('fchmodSync');
-export var fchownSync = unsupported('fchownSync');
-export var fdatasync = unsupported('fdatasync');
-export var fdatasyncSync = unsupported('fdatasyncSync');
-export var fstatSync = unsupported('fstatSync');
-export var fsyncSync = unsupported('fsyncSync');
-export var ftruncateSync = unsupported('ftruncateSync');
-export var futimesSync = unsupported('futimesSync');
-export var glob = unsupported('glob');
-export var globSync = unsupported('globSync');
-export var lchmodSync = unsupported('lchmodSync');
-export var lchownSync = unsupported('lchownSync');
-export var linkSync = unsupported('linkSync');
-export var lstatSync = unsupported('lstatSync');
-export var lutimes = unsupported('lutimes');
-export var lutimesSync = unsupported('lutimesSync');
-export var mkdirSync = unsupported('mkdirSync');
-export var mkdtemp = unsupported('mkdtemp');
-export var mkdtempSync = unsupported('mkdtempSync');
-export var openAsBlob = unsupported('openAsBlob');
-export var openSync = unsupported('openSync');
-export var opendir = unsupported('opendir');
-export var opendirSync = unsupported('opendirSync');
-export var readFileSync = unsupported('readFileSync');
-export var readSync = unsupported('readSync');
-export var readdirSync = unsupported('readdirSync');
-export var readlinkSync = unsupported('readlinkSync');
-export var readv = unsupported('readv');
-export var readvSync = unsupported('readvSync');
-export var realpathSync = unsupported('realpathSync');
-export var renameSync = unsupported('renameSync');
-export var rm = unsupported('rm');
-export var rmSync = unsupported('rmSync');
-export var rmdirSync = unsupported('rmdirSync');
-export var statSync = unsupported('statSync');
-export var statfs = unsupported('statfs');
-export var statfsSync = unsupported('statfsSync');
-export var symlinkSync = unsupported('symlinkSync');
-export var truncateSync = unsupported('truncateSync');
-export var unlinkSync = unsupported('unlinkSync');
-export var utimesSync = unsupported('utimesSync');
-export var writeFileSync = unsupported('writeFileSync');
-export var writeSync = unsupported('writeSync');
-export var writev = unsupported('writev');
-export var writevSync = unsupported('writevSync');
+export var accessSync;
+export var appendFileSync;
+export var chmodSync;
+export var chownSync;
+export var closeSync;
+export var copyFile;
+export var copyFileSync;
+export var cp;
+export var cpSync;
+export var existsSync;
+export var fchmodSync;
+export var fchownSync;
+export var fdatasync;
+export var fdatasyncSync;
+export var fstatSync;
+export var fsyncSync;
+export var ftruncateSync;
+export var futimesSync;
+export var glob;
+export var globSync;
+export var lchmodSync;
+export var lchownSync;
+export var linkSync;
+export var lstatSync;
+export var lutimes;
+export var lutimesSync;
+export var mkdirSync;
+export var mkdtemp;
+export var mkdtempSync;
+export var openAsBlob;
+export var openSync;
+export var opendir;
+export var opendirSync;
+export var readFileSync;
+export var readSync;
+export var readdirSync;
+export var readlinkSync;
+export var readv;
+export var readvSync;
+export var realpathSync;
+export var renameSync;
+export var rm;
+export var rmSync;
+export var rmdirSync;
+export var statSync;
+export var statfs;
+export var statfsSync;
+export var symlinkSync;
+export var truncateSync;
+export var unlinkSync;
+export var utimesSync;
+export var writeFileSync;
+export var writeSync;
+export var writev;
+export var writevSync;
 
-export var Dir = unsupported('Dir');
-export var Dirent = unsupported('Dirent');
-export var FileReadStream = unsupported('FileReadStream');
-export var FileWriteStream = unsupported('FileWriteStream');
-export var ReadStream = unsupported('ReadStream');
-export var Stats = unsupported('Stats');
-export var WriteStream = unsupported('WriteStream');
-export var _toUnixTimestamp = unsupported('_toUnixTimestamp');
+export var Dir;
+export var Dirent;
+export var FileReadStream;
+export var FileWriteStream;
+export var ReadStream;
+export var Stats;
+export var WriteStream;
+export var _toUnixTimestamp;
 
 export var promises = {
   access: function(path, mode) {
-    return promisify('stat')(path);
+    return new Promise(function(resolve, reject) {
+      access(path, mode, function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
   },
   appendFile: promisify('appendFile'),
   chmod: promisify('chmod'),
@@ -241,16 +263,16 @@ export var promises = {
   unlink: promisify('unlink'),
   utimes: promisify('utimes'),
   writeFile: promisify('writeFile'),
-  copyFile: copyFile,
-  cp: cp,
-  glob: glob,
-  lutimes: lutimes,
-  mkdtemp: mkdtemp,
-  open: unsupported('promises.open'),
-  opendir: opendir,
-  rm: rm,
-  statfs: statfs,
-  watch: watch
+  copyFile: unsupportedPromise('promises.copyFile'),
+  cp: unsupportedPromise('promises.cp'),
+  glob: unsupportedPromise('promises.glob'),
+  lutimes: unsupportedPromise('promises.lutimes'),
+  mkdtemp: unsupportedPromise('promises.mkdtemp'),
+  open: unsupportedPromise('promises.open'),
+  opendir: unsupportedPromise('promises.opendir'),
+  rm: unsupportedPromise('promises.rm'),
+  statfs: unsupportedPromise('promises.statfs'),
+  watch: unsupportedPromise('promises.watch')
 };
 
 export default {

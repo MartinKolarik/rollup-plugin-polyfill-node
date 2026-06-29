@@ -19,6 +19,14 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 import process from 'process';
+import * as types from './util-types';
+import {Buffer} from 'buffer';
+
+export { types };
+
+var textEncoderBrand = typeof WeakSet === 'function'
+  ? new WeakSet()
+  : typeof Symbol === 'function' ? Symbol('TextEncoder') : '__TextEncoderBrand__';
 
 var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
   function getOwnPropertyDescriptors(obj) {
@@ -32,16 +40,28 @@ var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
 
 var formatRegExp = /%[sdj%]/g;
 export function format(f) {
+  return formatWithInspectOptions(undefined, arguments);
+};
+
+export function formatWithOptions(inspectOptions, f) {
+  var args = [];
+  for (var i = 1; i < arguments.length; i++) {
+    args.push(arguments[i]);
+  }
+  return formatWithInspectOptions(inspectOptions, args);
+};
+
+function formatWithInspectOptions(inspectOptions, args) {
+  var f = args[0];
   if (!isString(f)) {
     var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(inspect(arguments[i]));
+    for (var i = 0; i < args.length; i++) {
+      objects.push(inspect(args[i], inspectOptions));
     }
     return objects.join(' ');
   }
 
   var i = 1;
-  var args = arguments;
   var len = args.length;
   var str = String(f).replace(formatRegExp, function(x) {
     if (x === '%%') return '%';
@@ -63,11 +83,11 @@ export function format(f) {
     if (isNull(x) || !isObject(x)) {
       str += ' ' + x;
     } else {
-      str += ' ' + inspect(x);
+      str += ' ' + inspect(x, inspectOptions);
     }
   }
   return str;
-};
+}
 
 
 // Mark that a method should not be used.
@@ -550,6 +570,146 @@ export function log() {
   console.log('%s - %s', timestamp(), format.apply(null, arguments));
 }
 
+// Matches Node's util.stripVTControlCharacters ANSI/VT escape pattern.
+var ansi = new RegExp(
+  '[\\u001B\\u009B][[\\]()#;?]*' +
+  '(?:(?:(?:(?:;[-a-zA-Z\\d\\/\\#&.:=?%@~_]+)*' +
+  '|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/\\#&.:=?%@~_]*)*)?' +
+  '(?:\\u0007|\\u001B\\u005C|\\u009C))' +
+  '|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?' +
+  '[\\dA-PR-TZcf-nq-uy=><~]))', 'g'
+);
+
+export function stripVTControlCharacters(str) {
+  if (typeof str !== 'string') {
+    var err = new TypeError('The "str" argument must be of type string. ' + formatInvalidStringArg(str));
+    err.code = 'ERR_INVALID_ARG_TYPE';
+    throw err;
+  }
+
+  return str.replace(ansi, '');
+}
+
+export function TextEncoder() {
+  if (!(this instanceof TextEncoder)) {
+    throw new TypeError("Class constructor TextEncoder cannot be invoked without 'new'");
+  }
+
+  if (textEncoderBrand instanceof WeakSet) {
+    textEncoderBrand.add(this);
+  } else {
+    Object.defineProperty(this, textEncoderBrand, {
+      value: true
+    });
+  }
+}
+
+Object.defineProperty(TextEncoder.prototype, 'encoding', {
+  get: function () {
+    assertTextEncoder(this);
+    return 'utf-8';
+  },
+  enumerable: true,
+  configurable: true
+});
+
+TextEncoder.prototype.encode = function encode(input) {
+  assertTextEncoder(this);
+  var string = textEncoderString(input);
+  return new Uint8Array(Buffer.from(string, 'utf8'));
+};
+
+TextEncoder.prototype.encodeInto = function encodeInto(input, destination) {
+  assertTextEncoder(this);
+  assertUint8Array(destination);
+
+  var string = textEncoderString(input);
+  var read = 0;
+  var written = 0;
+
+  for (var i = 0; i < string.length; i++) {
+    var code = string.charCodeAt(i);
+    var charLength = 1;
+    var char = string.charAt(i);
+
+    if (code >= 0xD800 && code <= 0xDBFF && i + 1 < string.length) {
+      var next = string.charCodeAt(i + 1);
+      if (next >= 0xDC00 && next <= 0xDFFF) {
+        charLength = 2;
+        char += string.charAt(i + 1);
+      }
+    }
+
+    var bytes = Buffer.from(char, 'utf8');
+
+    if (written + bytes.length > destination.length) {
+      break;
+    }
+
+    destination.set(bytes, written);
+    written += bytes.length;
+    read += charLength;
+    i += charLength - 1;
+  }
+
+  return {
+    read: read,
+    written: written
+  };
+};
+
+function assertTextEncoder(value) {
+  if (!value || (textEncoderBrand instanceof WeakSet ? !textEncoderBrand.has(value) : value[textEncoderBrand] !== true)) {
+    var err = new TypeError('Value of "this" must be of type TextEncoder');
+    err.code = 'ERR_INVALID_THIS';
+    throw err;
+  }
+}
+
+function assertUint8Array(value) {
+  if (!(value instanceof Uint8Array)) {
+    var err = new TypeError('The "dest" argument must be an instance of Uint8Array.');
+    err.code = 'ERR_INVALID_ARG_TYPE';
+    throw err;
+  }
+}
+
+function textEncoderString(input) {
+  if (input === undefined) {
+    return '';
+  }
+
+  if (typeof input === 'symbol') {
+    throw new TypeError('Cannot convert a Symbol value to a string');
+  }
+
+  return String(input);
+}
+
+function formatInvalidStringArg(value) {
+  if (value === undefined) {
+    return 'Received undefined';
+  }
+
+  if (value === null) {
+    return 'Received null';
+  }
+
+  if (typeof value === 'function') {
+    return 'Received function';
+  }
+
+  if (typeof value === 'object') {
+    return 'Received an instance of Object';
+  }
+
+  if (typeof value === 'bigint') {
+    return 'Received type bigint (' + value + 'n)';
+  }
+
+  return 'Received type ' + typeof value + ' (' + String(value) + ')';
+}
+
 
 /**
  * Inherit the prototype methods from one constructor into another.
@@ -710,7 +870,11 @@ export default {
   inspect: inspect,
   deprecate: deprecate,
   format: format,
+  formatWithOptions: formatWithOptions,
   debuglog: debuglog,
+  stripVTControlCharacters: stripVTControlCharacters,
+  TextEncoder: TextEncoder,
   promisify: promisify,
   callbackify: callbackify,
+  types: types,
 }

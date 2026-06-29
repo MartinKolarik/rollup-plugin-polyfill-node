@@ -113,12 +113,12 @@ export function access(path, mode, cb) {
     mode = F_OK;
   }
 
+  if (typeof cb !== 'function') {
+    throw new TypeError('fs.access callback must be a function');
+  }
+
   if (mode !== F_OK) {
     var err = new Error('fs.access only supports F_OK with the browserify-fs polyfill');
-    if (typeof cb !== 'function') {
-      throw err;
-    }
-
     return cb(err);
   }
 

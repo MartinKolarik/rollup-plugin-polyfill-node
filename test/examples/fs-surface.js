@@ -41,6 +41,15 @@ if (!accessError || !/only supports F_OK/.test(accessError.message)) {
   throw new Error('Expected unsupported fs.access modes to fail clearly');
 }
 
+try {
+  access('/test.txt');
+  throw new Error('Expected access without a callback to fail');
+} catch (err) {
+  if (!/callback must be a function/.test(err.message)) {
+    throw err;
+  }
+}
+
 if (typeof fs.promises.watch !== 'function') {
   throw new Error('Expected promises.watch to be a function');
 }

@@ -152,6 +152,45 @@ describe('rollup-plugin-node-polyfills', function() {
     .catch(done)
   });
 
+  it('does not initialize browserify-fs for unused fs imports', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-import.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      script.runInContext(vm.createContext({}));
+      done();
+    })
+    .catch(done)
+  });
+
+  it('throws a clear error when fs is called without IndexedDB', function(done) {
+    rollup.rollup({
+      input: 'test/examples/fs-call-non-browser.js',
+      plugins: [
+        nodePolyfills({
+          include: null
+        })
+      ]
+    })
+    .then(bundle => bundle.generate({format: 'cjs'}))
+    .then(generated => {
+      const script = new vm.Script(generated.output[0].code);
+      assert.throws(
+        () => script.runInContext(vm.createContext({})),
+        /fs polyfill requires an IndexedDB-compatible browser runtime/
+      );
+      done();
+    })
+    .catch(done)
+  });
+
   it('crypto option bundles broader crypto APIs', function(done) {
     rollup.rollup({
       input: 'test/examples/crypto-browserify.js',

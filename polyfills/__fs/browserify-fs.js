@@ -2468,6 +2468,8 @@ Level.prototype._checkKeyValue = function (obj, type) {
     return new Error(type + ' cannot be an empty Array')
 };
 
+var leveljs = /*@__PURE__*/getDefaultExportFromCjs(levelJs);
+
 var levelup$1 = {exports: {}};
 
 var xtend$4 = extend$6;
@@ -8420,6 +8422,7 @@ levelup$1.exports.destroy = utilStatic('destroy');
 levelup$1.exports.repair  = utilStatic('repair');
 
 var levelupExports = levelup$1.exports;
+var levelup = /*@__PURE__*/getDefaultExportFromCjs(levelupExports);
 
 var fwdStream = {};
 
@@ -19179,13 +19182,17 @@ var levelFilesystem = function(db, opts) {
 	return fs;
 };
 
-var leveljs = levelJs;
-var levelup = levelupExports;
-var fs = levelFilesystem;
+var levelFilesystem$1 = /*@__PURE__*/getDefaultExportFromCjs(levelFilesystem);
 
-var db$1 = levelup('level-filesystem', {db:leveljs});
-var browserifyFs = fs(db$1);
+let fs;
 
-var index = /*@__PURE__*/getDefaultExportFromCjs(browserifyFs);
+function getFs() {
+  if (!fs) {
+    const db = levelup('level-filesystem', { db: leveljs });
+    fs = levelFilesystem$1(db);
+  }
 
-export { index as default };
+  return fs;
+}
+
+export { getFs as default };
